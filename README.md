@@ -262,14 +262,11 @@ To contribute:
 For additional development guidelines, refer to `CONTRIBUTING.md`.
 
 ## License
-
-This project is based on the Chamilo Learning Management System, which is distributed under the GNU General Public License version 3 or later (GPL-3.0+).
-
-Refer to the repository's license files for complete licensing information.
+There should be no licensing for this project.
 
 ## Acknowledgements
 
-This project builds upon the Chamilo LMS open-source platform and its development ecosystem.
+This project builds upon the  LMS open-source platform and its development ecosystem.
 
 We acknowledge the contributions of the original developers and open-source contributors who maintain and improve the underlying learning management technology.
 
