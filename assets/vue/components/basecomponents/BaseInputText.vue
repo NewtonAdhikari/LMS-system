@@ -1,0 +1,86 @@
+<template>
+  <div class="field">
+    <FloatLabel variant="on">
+      <InputText
+        :id="id"
+        :aria-label="label"
+        :disabled="disabled"
+        :invalid="isInvalid"
+        :model-value="modelValue"
+        :required="required"
+        type="text"
+        v-bind="$attrs"
+        @update:model-value="updateValue"
+      />
+      <label :for="id">
+        {{ label }}
+      </label>
+    </FloatLabel>
+    <small
+      v-if="formSubmitted && isInvalid"
+      class="p-error"
+    >
+      {{ errorText }}
+    </small>
+    <small
+      v-if="helpText"
+      class="form-text text-muted"
+    >
+      {{ helpText }}
+    </small>
+  </div>
+</template>
+
+<script setup>
+import FloatLabel from "primevue/floatlabel"
+import InputText from "primevue/inputtext"
+
+defineOptions({ inheritAttrs: false })
+
+defineProps({
+  id: {
+    type: String,
+    required: true,
+    default: "",
+  },
+  label: {
+    type: String,
+    required: true,
+    default: "",
+  },
+  modelValue: {
+    type: [String, null],
+    required: true,
+  },
+  errorText: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  isInvalid: {
+    type: Boolean,
+    default: false,
+  },
+  required: {
+    type: Boolean,
+    default: false,
+  },
+  helpText: {
+    type: String,
+    default: "",
+  },
+  formSubmitted: {
+    type: Boolean,
+    default: false,
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+})
+
+const emits = defineEmits(["update:modelValue"])
+const updateValue = (value) => {
+  emits("update:modelValue", value)
+}
+</script>

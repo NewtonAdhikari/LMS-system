@@ -1,0 +1,89 @@
+{% extends "@ChamiloCore/Layout/layout_one_col.html.twig" %}
+
+{% block content %}
+    {% autoescape false %}
+        <link rel="stylesheet" href="{{ asset('build/flatpickr/flatpickr.min.css') }}"/>
+        <script>
+          document.addEventListener("DOMContentLoaded", function () {
+            $('.select2_user_rel_tag').each(function(i, obj) {
+              let fieldId = '&field_id=' + $(this).attr('data.field_id');
+
+              // Legacy CSRF token for old Chamilo AJAX endpoints.
+              // This prevents "CSRF error" warnings coming from legacy token checks.
+              let legacyToken = '&sec_token={{ legacy_token }}';
+
+              $(this).select2({
+                ajax: {
+                  url: '/main/inc/ajax/extra_field.ajax.php?{{ { 'name' : '', 'a': 'search_tags', 'type': 'user'}|url_encode }}' + fieldId + legacyToken,
+                  processResults: function (data) { return { results: data.items } }
+                },
+                cache: false,
+                tags: true,
+                tokenSeparators: [','],
+              });
+
+              $(this).on('select2:select', function (e) {
+                const data = e.params.data;
+                $(this).children('[value="' + data['id'] + '"]').attr({
+                  'data-id': data['id'],
+                  'value': data['text']
+                });
+              });
+
+              $(this).on('select2:unselect', function (e) {
+                let fieldId = '&tag_id=' + e.params.data.element.dataset.id;
+                $.ajax({
+                  url: '/main/inc/ajax/extra_field.ajax.php?{{ { 'a': 'delete_tag', 'type': 'user'}|url_encode }}' + fieldId + legacyToken,
+                  success: function(data) {}
+                });
+              });
+            });
+          });
+        </script>
+
+        <div class="section-header section-header--h2">
+            <h2 class="section-header__title">{{ user.fullName }}</h2>
+        </div>
+
+        <div class="flex md:flex-row gap-4 mt-6">
+            <div class="w-16">
+                <img class="h-16 w-16 rounded-full mb-4"
+                     src="{{ user | illustration }}?w=120&h=120&fit=crop"
+                     alt=""
+                />
+            </div>
+            <div class="flex-grow">
+                {{ form_start(form, { 'action': path('chamilo_core_account_edit'), 'attr': { 'class': 'edit' } }) }}
+                {# Legacy Chamilo CSRF token used by old token checks (sec_token). #}
+                <input type="hidden" name="sec_token" value="{{ legacy_token }}" />
+                {{ form_widget(form, {'attr': {'class': 'flex flex-col gap-4'}}) }}
+
+                <div>
+                    <button class="btn btn--primary" name="update_profile" type="submit">{{ 'Update profile'|trans }}</button>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+
+        {# Flatpickr JS from /build #}
+        <script src="{{ asset('build/flatpickr/flatpickr.min.js') }}"></script>
+        {# Optional locale example: <script src="/build/flatpickr/l10n/fr.js"></script> #}
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            if (window.flatpickr) {
+              flatpickr('.js-date-of-birth', {
+                dateFormat: 'Y-m-d',
+                allowInput: true,
+                altInput: true,
+                altFormat: 'd/m/Y',
+                maxDate: new Date().toISOString().slice(0,10),
+                // locale: 'fr',
+              });
+            }
+          });
+        </script>
+        <style>
+            form.edit .p-float-label > ul, form.edit .field > ul { margin-top: .25rem; color: #dc2626; font-size: .875rem; padding-left: 1.25rem; list-style: disc; }
+        </style>
+    {% endautoescape %}
+{% endblock %}

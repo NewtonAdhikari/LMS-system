@@ -1,214 +1,282 @@
-Education system
+# Learning Management System (LMS)
 
+**A comprehensive open-source platform for online education, course administration, and digital learning.**
 
-[![Behat tests 🐞](https://github.com/chamilo/chamilo-lms/actions/workflows/behat.yml/badge.svg)](https://github.com/chamilo/chamilo-lms/actions/workflows/behat.yml)
-[![PHPUnit 🐛](https://github.com/chamilo/chamilo-lms/actions/workflows/phpunit.yml/badge.svg)](https://github.com/chamilo/chamilo-lms/actions/workflows/phpunit.yml)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/chamilo/chamilo-lms/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/chamilo/chamilo-lms/?branch=master)
-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/166/badge)](https://bestpractices.coreinfrastructure.org/projects/166)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/88e934aab2f34bb7a0397a6f62b078b2)](https://www.codacy.com/app/chamilo/chamilo-lms?utm_source=github.com&utm_medium=referral&utm_content=chamilo/chamilo-lms&utm_campaign=badger)
-[![type-coverage](https://shepherd.dev/github/chamilo/chamilo-lms/coverage.svg)](https://shepherd.dev/github/chamilo/chamilo-lms/coverage.svg)
-[![psalm level](https://shepherd.dev/github/chamilo/chamilo-lms/level.svg)](https://shepherd.dev/github/chamilo/chamilo-lms/level.svg)
-[![DPG Badge](https://img.shields.io/badge/Verified-DPG%20(Since%20%202024)-3333AB?logo=data:image/svg%2bxml;base64,PHN2ZyB3aWR0aD0iMzEiIGhlaWdodD0iMzMiIHZpZXdCb3g9IjAgMCAzMSAzMyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE0LjIwMDggMjEuMzY3OEwxMC4xNzM2IDE4LjAxMjRMMTEuNTIxOSAxNi40MDAzTDEzLjk5MjggMTguNDU5TDE5LjYyNjkgMTIuMjExMUwyMS4xOTA5IDEzLjYxNkwxNC4yMDA4IDIxLjM2NzhaTTI0LjYyNDEgOS4zNTEyN0wyNC44MDcxIDMuMDcyOTdMMTguODgxIDUuMTg2NjJMMTUuMzMxNCAtMi4zMzA4MmUtMDVMMTEuNzgyMSA1LjE4NjYyTDUuODU2MDEgMy4wNzI5N0w2LjAzOTA2IDkuMzUxMjdMMCAxMS4xMTc3TDMuODQ1MjEgMTYuMDg5NUwwIDIxLjA2MTJMNi4wMzkwNiAyMi44Mjc3TDUuODU2MDEgMjkuMTA2TDExLjc4MjEgMjYuOTkyM0wxNS4zMzE0IDMyLjE3OUwxOC44ODEgMjYuOTkyM0wyNC44MDcxIDI5LjEwNkwyNC42MjQxIDIyLjgyNzdMMzAuNjYzMSAyMS4wNjEyTDI2LjgxNzYgMTYuMDg5NUwzMC42NjMxIDExLjExNzdMMjQuNjI0MSA5LjM1MTI3WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://digitalpublicgoods.net/r/chamilo)
+[![Build Status](https://img.shields.io/badge/Build-Project-blue)]()
+[![PHP](https://img.shields.io/badge/PHP-8.2%20%7C%208.3-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![Database](https://img.shields.io/badge/Database-MariaDB%20%7C%20MySQL-blue)]()
+[![License](https://img.shields.io/badge/License-GPL--3.0%2B-green)](https://www.gnu.org/licenses/gpl-3.0.html)
 
-Chamilo is an e-learning platform (also called "LMS" for Learning Management
-System) published under the GNU/GPLv3+ license. It has been used by more than
-40M people worldwide since its start in 2010.
+---
 
-> If you are deploying to a shared or free host such as ProFreeHost, please
-> review the deployment notes in [PROFREE_HOSTING.md](PROFREE_HOSTING.md).
+## Overview
 
+The Learning Management System (LMS) is a web-based educational platform designed to simplify the administration, delivery, and management of online learning activities.
 
-Chamilo offers a wide range of features, including:
-- Announcements
-- API for integration with other systems (HR, SIS, ERP, e-commerce, ...)
-- Assignments (create, hand in, grade, co-grade with AI, integration with plagiarism check, ...)
-- Attendance tracking (take attendance, Qualiopi reporting, multilevel attendance, signing, ...)
-- Calendar events (with reminders and subscriptions)
-- Content Management System capabilities (CMS: manage pages, menus)
-- Course administration (create, edit, delete, publish, export, import from Moodle, ...)
-- Course catalogue (e-commerce module, course search, catalogue filtering by user groups)
-- Documents (including integration with OnlyOffice for documents viewing and collaboration)
-- E-learning multimedia modules support (video, 360° video, audio, images, ...)
-- File sharing (upload, download, share, ...)
-- Forum (create, post, reply, peer review, ...)
-- Learning paths (create, manage, ...)
-- Live chat (at course level or global, including AI chatbot)
-- GDPR compliance (GDPR-ready, export of personal data, ...)
-- Gradebook (including generation of badges and certificates with QR codes)
-- Learning analytics (progress, course completion, participation, average time spent, average score, auditing, ...)
-- Groups/Classes (at course or global level)
-- Multilingual support (60+ languages fully translated, including RTL support)
-- Plugins for advanced features
-- Quizzes (20+ question types, random selection with categories, adaptative tests, time limits, co-creation with AI, proctoring tools integration, ...)
-- Roles and permissions management (beta)
-- Rooms and branches for in-person courses
-- SCORM 1.2, QTI, LTI, xAPI CMI 5, Aiken, and other standards compliant formats
-- Security features (password policy and rotation, 2FA/MFA authentication, HSTS, regular updates, IDS, ...)
-- Sessions management (re-use courses multiple times, add structure to long-term courses management chaos)
-- Skills management (create, edit, delete, assign to users, scale/levels of acquisition, ...)
-- Student profiles (edit personal data, change password, subscribe to push notifications, ...)
-- Style customization (easy color changes, custom CSS, custom logo, ...)
-- Surveys (create, take, analyse)
-- Upgrades from previous versions and import of existing courses from other LMS
-- Videoconference through integrations / Realtime collaboration
-- ...
+The platform provides an integrated environment for administrators, instructors, and students to manage educational resources, organize courses, conduct assessments, monitor academic progress, and collaborate through digital learning tools.
 
-Note: AI features (with support for OpenAI, Grok, Gemini, Claude and DeepSeek
-models) and other integrations do require active subscriptions to, or
-availability of, external services/applications.
+Built on the open-source Chamilo LMS platform, it provides a flexible learning environment suitable for educational institutions, training organizations, and online education providers.
 
-## Try it out
+The system combines course management, student administration, assessment tools, communication services, and learning analytics within a centralized platform.
 
-You can try out Chamilo at https://campus.chamilo.net/ (use the "Teach courses" option to give yourself creation rights).
+## Features
 
-## Quick install
+The platform provides a comprehensive set of educational and administrative features, including:
 
-**IMPORTANT** Chamilo 2.0 is in its validation phase right now.
-The installation procedure below is for reference only.
-For a stable Chamilo, please install Chamilo 1.11.x.
-See the 1.11.x branch's README.md for details.
+- **Announcements** – Publish course announcements and important academic notifications.
+- **API Integration** – Connect with external systems such as HR, SIS, ERP, and e-commerce platforms.
+- **Assignments** – Create assignments, manage submissions, evaluate work, and support collaborative grading.
+- **Attendance Management** – Record attendance, monitor participation, and generate attendance reports.
+- **Calendar Management** – Organize academic events, reminders, and scheduled activities.
+- **Content Management** – Create and manage educational pages, menus, and learning resources.
+- **Course Administration** – Create, edit, publish, import, export, and manage courses.
+- **Course Catalogue** – Organize courses and provide course discovery and filtering.
+- **Document Management** – Upload, download, share, and collaborate on educational documents.
+- **Multimedia Learning** – Support video, audio, images, and interactive learning materials.
+- **Discussion Forums** – Enable communication, discussions, peer reviews, and collaboration.
+- **Learning Paths** – Create and manage structured learning sequences.
+- **Live Chat** – Support communication between students and instructors.
+- **Gradebook** – Manage student grades, generate certificates, and issue achievement badges.
+- **Learning Analytics** – Monitor student progress, course completion, participation, and assessment performance.
+- **Group Management** – Organize students into groups and classes.
+- **Multilingual Support** – Provide multilingual interfaces with right-to-left language support.
+- **Online Quizzes** – Create assessments with multiple question types, time limits, and randomized questions.
+- **Role Management** – Configure user roles and access permissions.
+- **Session Management** – Organize courses and recurring learning sessions.
+- **Skills Management** – Define skills, assign competencies, and track learning achievements.
+- **Student Profiles** – Manage personal information, account settings, and notifications.
+- **Customization** – Customize the interface, colors, stylesheets, and platform branding.
+- **Surveys** – Create surveys, collect responses, and analyze results.
+- **Security** – Support authentication policies, two-factor authentication, and security configurations.
+- **Standards Compliance** – Support SCORM 1.2, QTI, LTI, xAPI CMI5, and Aiken formats.
+- **Video Conferencing** – Integrate external conferencing and real-time collaboration services.
 
-### Minimum hardware requirements
+**Note:** AI-powered functionality and certain external integrations require access to compatible third-party services and may require separate subscriptions.
 
-#### Server
+## Installation
 
-You will need:
-- 2 vCPUs
-- 4GB RAM
-- 4GB free disk space
+### System Requirements
 
-Chamilo 2.0 has been tested on a 2 vCPUs, 2GB RAM virtual machine under Ubuntu 24.04 and has been shown to work, but to
-build the development environment, you will need at least 4GB RAM.
-At this stage, we haven't made any load testing to evaluate the number of users that could use the system simultaneously.
-Remember this is an alpha version. As such, it will run in "dev" mode (see the `.env` file), considerably more slowly the "prod" mode.
+Before installing the application, ensure that the server meets the following minimum requirements.
 
-#### Client
+**Server Requirements**
 
-Any recent computer with a recent (no older than 5y) browser should do.
+| Component | Requirement |
+|---|---|
+| Processor | 2 vCPUs |
+| RAM | 4 GB recommended |
+| Storage | 4 GB available disk space |
+| Operating System | Ubuntu Server 24.04 LTS or later |
+| Web Server | Apache |
+| PHP | PHP 8.2 or 8.3 |
+| Database | MariaDB 10+ or MySQL 5.7+ |
 
-### Minimal software stack requirements
+**Client Requirements**
 
-You should have:
+- A modern desktop or laptop computer.
+- An updated web browser.
+- A stable internet connection.
+- JavaScript-enabled browser support.
 
-- A web server with a virtualhost in a domain or subdomain (not in a subfolder inside a domain with another application).
+### Software Dependencies
 
-    *For free hosts such as ProFreeHost, upload the contents of `public/` to the host's `public_html` directory and keep the rest of the code above the web root.*
-- A working PHP configuration with PHP 8.2 or 8.3
-- MariaDB 10 or higer (alternatively, MySQL 5.7 or higher can also be used)
+The application requires the following software components:
 
-### Software stack installation (Ubuntu)
+- PHP and the required PHP extensions.
+- Apache HTTP Server.
+- MariaDB or MySQL database server.
+- PHP database connectivity.
+- Composer and other development dependencies when installing from source.
 
-You can install Chamilo using 3rd party installers like Softaculous,
-Installatron, DigitalOcean marketplace, etc. and skip the following steps.
+### Installation on Ubuntu
 
-These are instructions for a fictitious `my.chamilo.net` domain, with a
-`chamilo2` database and DB user, on your own self-managed server.
-Please adapt the commands below accordingly.
+The following instructions describe a reference installation of Chamilo 2.0 on an Ubuntu server.
 
-These instructions are meant for a standalone public server, with no
-additional component needed. These do not include setting up SSL certificates.
-We leave the latter to you.
+**1. Update the System**
 
-If using VMs, spawn an Ubuntu Server (24.04 LTS or later) VM.
-Login through SSH with admin permissions through `sudo`. Otherwise, just use
-the `sudo` command as needed on your own server.
-Install the software stack and Chamilo using the commands below.
-
-~~~~
+```bash
 sudo apt update && sudo apt -y upgrade
-sudo apt install -y apache2 libapache2-mod-php mariadb-client mariadb-server php-{apcu,bcmath,cli,curl,dev,gd,intl,ldap,mbstring,mysql,redis,soap,xml,zip} unzip curl
-sudo mysql -e "GRANT ALL PRIVILEGES ON chamilo2.* TO chamilo2@localhost IDENTIFIED BY 'chamilo2';"
+```
+
+**2. Install Required Packages**
+
+```bash
+sudo apt install -y apache2 libapache2-mod-php \
+mariadb-client mariadb-server \
+php-{apcu,bcmath,cli,curl,dev,gd,intl,ldap,mbstring,mysql,redis,soap,xml,zip} \
+unzip curl
+```
+
+**3. Configure the Database**
+
+Create the application database and configure a dedicated database user with the necessary permissions.
+
+Use secure database credentials instead of example passwords.
+
+**4. Download the Application**
+
+For the documented Chamilo 2.0 release candidate:
+
+```bash
 cd /var/www
+
 sudo wget https://github.com/chamilo/chamilo-lms/releases/download/v2.0.0-RC.1/chamilo-2.0.0-RC.1.tar.gz
+
 sudo tar zxf chamilo-2.0.0-RC.1.tar.gz
+
 sudo mv chamilo-2.0.0-RC.1 chamilo
-cd chamilo
-sudo cp public/main/install/apache.dist.conf /etc/apache2/sites-available/my.chamilo.net.conf
-# Edit /etc/apache2/sites-available/my.chamilo.net.conf to match your domain
-sudo a2ensite my.chamilo.net
+```
+
+**5. Configure Apache**
+
+```bash
+cd /var/www/chamilo
+
+sudo cp public/main/install/apache.dist.conf \
+/etc/apache2/sites-available/lms.conf
+```
+
+Configure the virtual host according to your domain and server environment.
+
+Enable the required Apache modules:
+
+```bash
+sudo a2ensite lms.conf
+
 sudo a2enmod rewrite ssl headers expires
+```
+
+**6. Configure Permissions**
+
+```bash
 sudo chown -R www-data: .env config/ var/
+
 sudo systemctl restart apache2
-# Open http://my.chamilo.net in your browser to go through the installation wizard
-# Complete the installation information using DB credentials chamilo2/chamilo2/chamilo2 and the default host and port
+```
 
-For deployments on shared or free hosts (e.g. ProFreeHost) see [PROFREE_HOSTING.md](PROFREE_HOSTING.md) for step-by-step guidance and a sample `.env` file.
-# Done
-~~~~
+**7. Complete the Installation**
 
-Note: PHP's LDAP extension is only required if you need to connect to LDAP or a
-compatible system, or if you want to install Chamilo from sources (see
-CONTRIBUTING.md), but in principle it should not add any overhead to the
-system if you don't use it.
+Open the configured domain in your browser:
 
-#### Installing from sources
+```text
+https://your-domain.com
+```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+Follow the installation wizard to configure the database connection, administrator account, and application settings.
 
-### Web installer
+After installation, restore secure ownership and permissions for sensitive configuration files.
 
-Once the above is ready, use your browser to load the URL you have defined for your host, e.g. https://my.chamilo.net
-(this should redirect you to `main/install/index.php`) and follow the UI instructions (database, admin user settings, etc).
+**Important:** Chamilo 2.0.0-RC.1 is a release-candidate version. The original project documentation recommends Chamilo 1.11.x for stable installations. Verify the currently supported release before production deployment.
 
-After the web install process, change the permissions back to a reasonably safe state:
-~~~~
-chown -R root: .env config/
-~~~~
-
-Your Chamilo is ready to use!
+For shared or free hosting environments, refer to `PROFREE_HOSTING.md`.
 
 ## Configuration
 
-Most configuration changes are made through the administration page inside Chamilo's web interface, but the database connection
-and other settings critical to the Symfony layer are located in the `.env` file at the root of Chamilo.
+Most application settings can be managed through the administration interface.
 
-Other core, Symfony-related, settings for advanced administration are located in the `config/packages/` folder (`*.yaml` files),
-but remember that these files are updated with each new version of Chamilo. Instead of modifying those directly, it is
-highly recommended to copy them into the `config/packages/prod/` folder and modifying them there (for your production 
-environment). This will improve maintainability through different Chamilo upgrades in the future.
+The primary configuration files include:
+
+| File / Directory | Purpose |
+|---|---|
+| `.env` | Environment variables and database configuration. |
+| `config/` | Application and framework configuration. |
+| `config/packages/` | Symfony package configuration. |
+| `var/` | Application runtime data and cache. |
+| `public/` | Public web application directory. |
+
+For advanced configuration, it is recommended to place environment-specific overrides in `config/packages/prod/` rather than directly modifying the default configuration files.
+
+This approach improves maintainability and reduces configuration conflicts during application upgrades.
+
+## Usage
+
+Once installation is complete, administrators, instructors, and students can access the platform through their respective accounts.
+
+The platform provides dedicated functionality for:
+
+- **Administrators:** Manage users, courses, permissions, system settings, and platform configuration.
+- **Instructors:** Create courses, upload learning materials, manage assignments, conduct assessments, and evaluate students.
+- **Students:** Access courses, study learning materials, submit assignments, participate in discussions, and monitor academic progress.
+
+A demonstration environment is also available through the official Chamilo platform:
+
+https://campus.chamilo.net/
+
+## API Integration
+
+The platform supports API integration for communication with external applications and services.
+
+JWT authentication can be used to secure API requests.
+
+**Generate JWT Keys**
+
+```bash
+php bin/console lexik:jwt:generate-keypair
+```
+
+**Configure Apache Authorization Headers**
+
+```apache
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+```
+
+**Generate an Authentication Token**
+
+```bash
+curl -X POST https://your-domain.com/api/authentication_token \
+-H "Content-Type: application/json" \
+-d '{"username":"admin","password":"your-password"}'
+```
+
+The authentication endpoint returns a JWT token that can be used to authorize subsequent API requests.
+
+**API Documentation**
+
+After configuring the application, access:
+
+```text
+https://your-domain.com/api
+```
+
+Use the Authorize option to provide the generated bearer token.
 
 ## Documentation
 
-For more information on Chamilo 2, visit https://2.chamilo.org/documentation/index.html
-For Chamilo usage documentation, most of the documentation at
-https://docs.chamilo.org/ is still valid for Chamilo 2, despite having been
-written for Chamilo 1.
+Additional technical documentation and resources are available through the following links:
 
-## JWT Authentication
-
-This version of Chamilo allows you to use a JWT (token) to use the Chamilo API
-more securely. In order to use it, you will have to generate a JWT token as
-follows.
-
-* Run
-  ```shell
-  php bin/console lexik:jwt:generate-keypair
-  ```
-* In Apache setup Bearer with:
-  ```apacheconf
-  SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
-  ```
-* Get the token:
-  ```shell
-  curl -k -X POST https://example.com/api/authentication_token \
-      -H "Content-Type: application/json" \
-      -d '{"username":"admin","password":"admin"}'
-  ```
-  The response should return something like:
-  ```json
-  {"token":"MyTokenABC"}
-  ```
-* Go to https://example.com/api
-* Click in "Authorize" button and write the value
-`Bearer MyTokenABC`
-
-Then you can make queries using the JWT token.
+- [Chamilo Official Documentation](https://docs.chamilo.org/)
+- [Chamilo 2.0 Documentation](https://2.chamilo.org/documentation/index.html)
+- [PHP Documentation](https://www.php.net/docs.php)
+- [MariaDB Documentation](https://mariadb.org/documentation/)
+- [MySQL Documentation](https://dev.mysql.com/doc/)
 
 ## Contributing
 
-If you want to submit new features or patches to Chamilo 2, please follow the
-Github contribution guide https://guides.github.com/activities/contributing-to-open-source/
-and our [CONTRIBUTING.md](CONTRIBUTING.md) file.
+Contributions, improvements, and technical suggestions are welcome.
 
-In short, we ask you to send us Pull Requests based on a branch that you create
-with this purpose into your own repository, forked from the original Chamilo repository (`master` branch).
+To contribute:
+
+1. Fork the repository.
+2. Create a dedicated feature branch.
+3. Implement your changes.
+4. Test the implementation.
+5. Commit your changes with a descriptive message.
+6. Submit a pull request.
+
+For additional development guidelines, refer to `CONTRIBUTING.md`.
+
+## License
+
+This project is based on the Chamilo Learning Management System, which is distributed under the GNU General Public License version 3 or later (GPL-3.0+).
+
+Refer to the repository's license files for complete licensing information.
+
+## Acknowledgements
+
+This project builds upon the Chamilo LMS open-source platform and its development ecosystem.
+
+We acknowledge the contributions of the original developers and open-source contributors who maintain and improve the underlying learning management technology.
+
+---
+
+**Learning Management System — Empowering Digital Education Through Technology.**

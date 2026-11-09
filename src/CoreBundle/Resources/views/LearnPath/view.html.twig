@@ -1,0 +1,1093 @@
+{% extends '@ChamiloCore/Layout/no_layout.html.twig' %}
+
+{% set lp_view = true %}
+
+{% block content %}
+    {% set toc_hidden = (toc_hidden|default(0) + 0) %}
+    {% set show_left_column = (show_left_column|default(1) + 0) %}
+    {% set lp_id_num = (lp_id|default(0) + 0) %}
+    {% set lp_current_item_id_num = (lp_current_item_id|default(0) + 0) %}
+    {% set render_left_zone = (show_left_column == 1) or (toc_hidden == 1) %}
+    <script>
+      window.lpId = {{ lp_id_num }};
+      window.lpCurrentItemId = {{ lp_current_item_id_num }};
+    </script>
+    {# Build iframe src including learning path context so the ResourceNodeVoter can detect LP access #}
+    {% set iframe_src_with_lp = iframe_src %}
+    {% if lp_id_num > 0 and lp_current_item_id_num > 0 %}
+        {% if '?' in iframe_src_with_lp %}
+            {% set iframe_src_with_lp = iframe_src_with_lp ~ '&origin=learnpath&lp_id=' ~ lp_id_num ~ '&lp_item_id=' ~ lp_current_item_id_num %}
+        {% else %}
+            {% set iframe_src_with_lp = iframe_src_with_lp ~ '?origin=learnpath&lp_id=' ~ lp_id_num ~ '&lp_item_id=' ~ lp_current_item_id_num %}
+        {% endif %}
+    {% endif %}
+
+    {% autoescape false %}
+        <style>
+            html, body { height: 100%; }
+            #learning_path_main {
+                display: flex !important;
+                flex-direction: row !important;
+                width: 100% !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
+                overflow: hidden !important;
+            }
+            #learning_path_left_zone {
+                flex: 0 0 360px !important;
+                width: 360px !important;
+                height: 100% !important;
+                overflow: hidden !important;
+            }
+            #learning_path_left_zone .lp-view-zone-container {
+                height: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+            }
+            #toc_id.scorm-body {
+                flex: 1 1 auto !important;
+                min-height: 0 !important;
+                overflow: auto !important;
+            }
+            #learning_path_right_zone {
+                flex: 1 1 auto !important;
+                height: 100% !important;
+                overflow: hidden !important;
+            }
+            #learning_path_right_zone .lp-view-zone-container {
+                height: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+            }
+            #learning_path_right_zone .lp-view-tabs {
+                flex: 1 1 auto !important;
+                min-height: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+            }
+            #tab-iframe {
+                flex: 1 1 auto !important;
+                min-height: 0 !important;
+                overflow: hidden !important;
+            }
+            #lp-view-content, #wrapper-iframe {
+                height: 100% !important;
+                min-height: 0 !important;
+                overflow: hidden !important;
+            }
+            #content_id, #content_id_blank {
+                width: 100% !important;
+                height: 100% !important;
+            }
+            #learning_path_main.lp-toc-hidden #learning_path_left_zone {
+                flex: 0 0 0 !important;
+                width: 0 !important;
+                min-width: 0 !important;
+                overflow: hidden !important;
+            }
+            #learning_path_main.lp-toc-hidden #learning_path_left_zone .lp-view-zone-container {
+                position: fixed !important;
+                left: -10000px !important;
+                top: 0 !important;
+                width: 360px !important;
+                height: 100vh !important;
+                overflow: auto !important;
+            }
+            #learning_path_right_zone.lp-content-full {
+                flex: 1 1 auto !important;
+                width: 100% !important;
+                margin-left: 0 !important;
+            }
+
+            /* ============================================================
+             * Floating menu (stable anchor + responsive layout)
+             *
+             * Requirements:
+             * - Hamburger must NEVER move when opening/closing the panel.
+             * - TOC expanded (normal): panel is horizontal, aligned with hamburger.
+             * - TOC collapsed by expand-toggle (.lp-view-collapsed): panel is vertical under hamburger.
+             * - TOC hidden by setting (.lp-toc-hidden): menu goes top-right + panel vertical under hamburger.
+             * ============================================================ */
+
+            /* Reset inherited legacy styling */
+            #btn-menu-float,
+            #btn-menu-float > div,
+            #btn-menu-float > ul {
+                background: transparent !important;
+                border: 0 !important;
+                box-shadow: none !important;
+            }
+
+            /* Base anchor: top-left */
+            #btn-menu-float {
+                position: fixed !important;
+                top: 12px !important;
+                left: 12px !important;
+                right: auto !important;
+                width: 40px !important;
+                height: 40px !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                z-index: 999999 !important;
+            }
+
+            /* Top-right mode (only when .lp-toc-hidden is active) */
+            #btn-menu-float.lp-menu-top-right {
+                left: auto !important;
+                right: 12px !important;
+            }
+
+            /* Hamburger button: absolute so it never shifts */
+            #btn-menu-float .menu-button {
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+
+                width: 40px !important;
+                height: 40px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+
+                border-radius: 10px !important;
+                border: 1px solid rgba(0,0,0,0.10) !important;
+                background: rgba(255,255,255,0.94) !important;
+                box-shadow: 0 1px 6px rgba(0,0,0,0.14) !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            #btn-menu-float.lp-menu-top-right .menu-button {
+                left: auto !important;
+                right: 0 !important;
+            }
+
+            #btn-menu-float .menu-button.menu-button-selected {
+                background: rgba(255,255,255,0.98) !important;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.16) !important;
+            }
+
+            /* Panel container */
+            #btn-menu-float .circle {
+                position: absolute !important;
+                top: 0 !important;
+                left: 48px !important;
+                right: auto !important;
+                display: none !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 4px !important;
+                padding: 0px !important;
+                white-space: nowrap !important;
+            }
+            #btn-menu-float .circle.open {
+                display: inline-flex !important;
+            }
+
+            /* Vertical panel: under the hamburger, aligned to it */
+            #btn-menu-float.lp-menu-vertical .circle {
+                top: 48px !important;
+                left: 0 !important;
+                right: auto !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 8px !important;
+                padding: 6px 0 !important;
+                white-space: normal !important;
+            }
+
+            /* Vertical + top-right: under the hamburger, right aligned */
+            #btn-menu-float.lp-menu-top-right.lp-menu-vertical .circle {
+                left: auto !important;
+                right: 0 !important;
+                align-items: flex-end !important;
+            }
+
+            /* Toolbar items */
+            #btn-menu-float .circle .icon-toolbar,
+            #btn-menu-float .circle a.icon-toolbar,
+            #btn-menu-float .circle button.icon-toolbar,
+            #btn-menu-float .circle .lp-menu-nav a,
+            #btn-menu-float .circle .lp-menu-nav button {
+                width: 40px !important;
+                height: 40px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                border-radius: 10px !important;
+                border: 1px solid rgba(0,0,0,0.08) !important;
+                background: rgba(255,255,255,0.98) !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            #btn-menu-float .circle .icon-toolbar:hover,
+            #btn-menu-float .circle .lp-menu-nav a:hover,
+            #btn-menu-float .circle .lp-menu-nav button:hover {
+                background: #fff !important;
+            }
+
+            /* Navigation bar wrapper - force layout (avoid "square" grouping) */
+            #btn-menu-float .circle .lp-menu-nav {
+                display: flex !important;
+                flex-direction: row !important;      /* horizontal by default */
+                align-items: center !important;
+                gap: 8px !important;
+            }
+            #btn-menu-float.lp-menu-vertical .circle .lp-menu-nav {
+                flex-direction: column !important;   /* vertical when TOC is collapsed/hidden */
+                align-items: flex-start !important;
+                gap: 8px !important;
+            }
+            #btn-menu-float.lp-menu-top-right.lp-menu-vertical .circle .lp-menu-nav {
+                align-items: flex-end !important;
+            }
+
+            /* -----------------------------
+             * Loader overlay
+             * ----------------------------- */
+            #wrapper-iframe { position: relative !important; }
+            #lp-iframe-loader {
+                position: absolute;
+                inset: 0;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                background: rgba(255,255,255,0.75);
+                z-index: 50;
+            }
+            #lp-iframe-loader.is-visible {
+                display: flex;
+            }
+            .lp-loader-box {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                border-radius: 10px;
+                background: rgba(0,0,0,0.65);
+                color: #fff;
+                font-size: 14px;
+            }
+            .lp-spinner {
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                border: 2px solid rgba(255,255,255,0.35);
+                border-top-color: rgba(255,255,255,0.95);
+                animation: lpSpin 0.8s linear infinite;
+            }
+            @keyframes lpSpin {
+                to { transform: rotate(360deg); }
+            }
+        </style>
+        <div
+                id="learning_path_main"
+                class="{{ is_allowed_to_edit ? 'lp-view-include-breadcrumb' }} {{ lp_mode == 'embedframe' ? 'lp-view-collapsed' : '' }} {{ toc_hidden == 1 ? 'lp-toc-hidden' : '' }}"
+        >
+            {% if render_left_zone %}
+                <div id="learning_path_left_zone" class="sidebar-scorm" aria-hidden="{{ toc_hidden == 1 ? 'true' : 'false' }}">
+                    <div class="lp-view-zone-container">
+                        <div id="scorm-info">
+                            <div id="panel-scorm">
+                                <div class="image-avatar">
+                                    {% if lp_author == '' %}
+                                        {{ lp_preview_image }}
+                                    {% else %}
+                                        <div class="media-author">
+                                            <div class="media-author-avatar">
+                                                {{ lp_preview_image }}
+                                            </div>
+                                            <div class="media-author-description">
+                                                {{ lp_author }}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {% if show_audio_player %}
+                                    <div id="lp_media_file" class="audio-scorm">
+                                        {{ media_player }}
+                                    </div>
+                                {% endif %}
+
+                                {% if lp_accumulate_work_time != '' %}
+                                    {% set lp_progress %}
+                                    <style>
+                                        #timer .container {
+                                            display: table;
+                                            background: #777;
+                                            color: #eee;
+                                            font-weight: bold;
+                                            width: 100%;
+                                            text-align: center;
+                                            text-shadow: 1px 1px 4px #999;
+                                        }
+                                        #timer .container div {
+                                            display: table-cell;
+                                            font-size: 24px;
+                                            padding: 0px;
+                                            width: 20px;
+                                        }
+                                        #timer .container .divider {
+                                            width: 10px;
+                                            color: #ddd;
+                                        }
+                                    </style>
+                                    <script>
+                                      $(function () {
+                                        var timerData = {
+                                          hour: parseInt($("#hour").text(), 10),
+                                          minute: parseInt($("#minute").text(), 10),
+                                          second: parseInt($("#second").text(), 10)
+                                        }
+                                        clearInterval(window.timerInterval)
+                                        window.timerInterval = setInterval(function () {
+                                          timerData.second++
+                                          if (timerData.second >= 60) { timerData.second = 0; timerData.minute++ }
+                                          if (timerData.minute >= 60) { timerData.minute = 0; timerData.hour++ }
+                                          $("#hour").text(timerData.hour < 10 ? "0" + timerData.hour : timerData.hour)
+                                          $("#minute").text(timerData.minute < 10 ? "0" + timerData.minute : timerData.minute)
+                                          $("#second").text(timerData.second < 10 ? "0" + timerData.second : timerData.second)
+                                        }, 1000)
+                                      })
+                                    </script>
+                                    <div class="row">
+                                        <div class="col-xs-4">
+                                            <b>{{ "Progress"|trans|format(lp_accumulate_work_time) }}</b>
+                                        </div>
+                                        <div class="col-xs-8">
+                                            <div id="progress_bar">{{ progress_bar }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-4">
+                                            <b>{{ "Time spent in the learning path"|trans|format(lp_accumulate_work_time) }}</b>
+                                        </div>
+                                        <div class="col-xs-8">
+                                            <div id="timer">
+                                                <div class="container">
+                                                    <div id="hour">{{ hour }}</div>
+                                                    <div class="divider">:</div>
+                                                    <div id="minute">{{ minute }}</div>
+                                                    <div class="divider">:</div>
+                                                    <div id="second">{{ second }}</div>
+                                                    <div id="slash"> /</div>
+                                                    <div>{{ hour_min }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endset %}
+                                {% else %}
+                                    {% set lp_progress %}
+                                    <div id="progress_bar">{{ progress_bar }}</div>
+                                    {% endset %}
+                                {% endif %}
+
+                                {% if gamification_mode == 1 %}
+                                    <div id="scorm-gamification">
+                                        <div class="row">
+                                            <div class="col-xs-6">
+                                                {% if gamification_stars > 0 %}
+                                                    {% for i in 1..gamification_stars %}
+                                                        <i class="level mdi-star-face mdi" aria-hidden="true"></i>
+                                                    {% endfor %}
+                                                {% endif %}
+                                                {% if gamification_stars < 4 %}
+                                                    {% for i in 1..4 - gamification_stars %}
+                                                        <i class="mdi-home-outline mdi" aria-hidden="true"></i>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-xs-6 text-right">
+                                                {{ "%s points"|trans|format(gamification_points) }}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xs-12 navegation-bar">
+                                                {{ lp_progress }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    {{ lp_progress }}
+                                {% endif %}
+
+                                {{ teacher_toc_buttons }}
+                            </div>
+                        </div>
+
+                        <div id="toc_id" class="scorm-body" name="toc_name">
+                            <div id="flag-mobile" class="visible-xs-block" aria-hidden="true"></div>
+                            {% include '@ChamiloCore/LearnPath/scorm_list.html.twig' %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            <div
+                    id="learning_path_right_zone"
+                    class="content-scorm {{ (show_left_column != 1 or toc_hidden == 1) ? 'lp-content-full' : '' }}"
+            >
+                <div class="lp-view-zone-container">
+                    <div class="lp-view-tabs">
+                        <div id="navTabBar" class="nav-tabs-bar">
+                            <div class="text-left">
+                                <h2 class="text-h3">{{ lp_title_scorm }}</h2>
+                                <div id="item-parent-names">
+                                    {% for parent_title in lp_item_parents %}
+                                        <h3 class="text-h5">{{ parent_title }}</h3>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {% include '@ChamiloCore/LearnPath/menubar.html.twig' %}
+
+                        <div id="tab-iframe" class="auto tab-content">
+                            <div role="tabpanel" id="lp-view-content">
+                                <div id="wrapper-iframe">
+                                    <div id="lp-iframe-loader" aria-hidden="true">
+                                        <div class="lp-loader-box">
+                                            <div class="lp-spinner" aria-hidden="true"></div>
+                                            <div>Loading…</div>
+                                        </div>
+                                    </div>
+                                    {% if lp_mode == 'fullscreen' %}
+                                        <iframe id="content_id_blank" name="content_name_blank" src="blank.php"
+                                                style="width:100%; height:100%" border="0" frameborder="0"
+                                                allowfullscreen="true" webkitallowfullscreen="true"
+                                                mozallowfullscreen="true"></iframe>
+                                    {% else %}
+                                        <iframe id="content_id" name="content_name" src="{{ iframe_src_with_lp }}"
+                                                style="width:100%; height:100%" border="0" frameborder="0"
+                                                allowfullscreen="true" webkitallowfullscreen="true"
+                                                mozallowfullscreen="true"></iframe>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="lp-view-forum"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+          $(function () {
+            var $main = $("#learning_path_main");
+            var tocHiddenSetting = $main.hasClass("lp-toc-hidden") ? 1 : 0;
+
+            var $menu = $("#btn-menu-float");
+            if (!$menu.length) {
+              console.warn("LP: floating menu not found (#btn-menu-float).");
+              return;
+            }
+
+            // Prefer data attributes, fallback to legacy classes.
+            var $circle = $menu.find("[data-lp-menu='circle']").first();
+            if (!$circle.length) {
+              $circle = $menu.find(".circle").first();
+            }
+
+            var $toggle = $menu.find("[data-lp-menu='toggle']").first();
+            if (!$toggle.length) {
+              $toggle = $menu.find(".menu-button").first();
+            }
+
+            function updateMenuLayout() {
+              // Layout rules:
+              // - Real TOC hidden setting -> top-right + vertical panel
+              // - Collapsed TOC (lp-view-collapsed) -> left + vertical panel
+              // - Normal mode -> left + horizontal panel
+              var isTocHidden = $main.hasClass("lp-toc-hidden");
+              var isCollapsed = $main.hasClass("lp-view-collapsed");
+              $menu.toggleClass("lp-menu-top-right", isTocHidden);
+              $menu.toggleClass("lp-menu-vertical", isTocHidden || isCollapsed);
+            }
+
+            updateMenuLayout();
+            // Observe class changes to keep menu layout consistent (covers expand/collapse toggles).
+            try {
+              var mo = new MutationObserver(function () {
+                updateMenuLayout();
+              });
+              mo.observe($main.get(0), { attributes: true, attributeFilter: ["class"] });
+            } catch (e) {
+              console.warn("LP: MutationObserver not available, menu layout will update only on known actions.");
+            }
+
+            // Auto-open only once when TOC is hidden by setting (do not fight the user after that).
+            if (tocHiddenSetting === 1 && $circle.length && $toggle.length) {
+              if (!$menu.data("lpAutoOpened")) {
+                $circle.addClass("open");
+                $toggle.addClass("menu-button-selected");
+                $menu.data("lpAutoOpened", true);
+              }
+            }
+
+            // Toggle only this LP menu (avoid global selectors) - and NEVER navigate on toggle.
+            if ($toggle.length && $circle.length) {
+              $toggle.off("click.lpMenu").on("click.lpMenu", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                $circle.toggleClass("open");
+                $toggle.toggleClass("menu-button-selected");
+
+                return false;
+              });
+            } else {
+              console.warn("LP: menu toggle/circle not found. Toggle binding skipped.");
+            }
+
+            // Expand/collapse only when TOC is visible (setting != 1)
+              {% if toc_hidden != 1 %}
+              {% if lp_mode == 'embedframe' %}
+            $("#lp-view-expand-toggle").off("click.lpExpand").on("click.lpExpand", function (e) {
+              e.preventDefault();
+              $main.toggleClass("lp-view-collapsed");
+              $("#lp-view-expand-toggle i.mdi").toggleClass("mdi-arrow-expand-horizontal");
+              $("#lp-view-expand-toggle i.mdi").toggleClass("mdi-arrow-collapse-horizontal");
+              updateMenuLayout();
+            });
+              {% else %}
+            $("#lp-view-expand-toggle").off("click.lpExpand").on("click.lpExpand", function (e) {
+              e.preventDefault();
+              $main.toggleClass("lp-view-collapsed");
+              $("#lp-view-expand-toggle i.mdi").toggleClass("mdi-arrow-collapse-horizontal");
+              $("#lp-view-expand-toggle i.mdi").toggleClass("mdi-arrow-expand-horizontal");
+              updateMenuLayout();
+            });
+              {% endif %}
+              {% endif %}
+
+            // Debug: show what iframe is currently loading
+            try {
+              var iframeSrc = $("#content_id").attr("src") || $("#content_id_blank").attr("src") || "";
+              console.info("LP: current iframe src =", iframeSrc);
+            } catch (e) {
+              console.warn("LP: cannot read iframe src:", e);
+            }
+
+            function isRealHref(href) {
+              return href && href !== "#" && href.indexOf("javascript:") !== 0;
+            }
+
+            function extractUrlFromOnclick(onclickValue) {
+              if (!onclickValue) return "";
+
+              // 1) frames.content_name.location='...'
+              var m1 = onclickValue.match(/content_name(?:_blank)?\.location(?:\.href)?\s*=\s*['"]([^'"]+)['"]/);
+              if (m1 && m1[1]) return m1[1];
+
+              // 2) Any direct lp_controller.php... in onclick
+              var m2 = onclickValue.match(/(lp_controller\.php[^'"]+)/);
+              if (m2 && m2[1]) return m2[1];
+
+              // 3) Fallback: any lp_view.php / lp_content.php inside onclick
+              var m3 = onclickValue.match(/(lp_(?:view|content)\.php[^'"]+)/);
+              if (m3 && m3[1]) return m3[1];
+
+              return "";
+            }
+
+            function resolveUrl(el) {
+              var $el = $(el);
+
+              // Prefer patched URL if present
+              var patched = $el.attr("data-lp-nav-url") || "";
+              if (patched) return patched;
+
+              var href = $el.attr("href") || "";
+              if (isRealHref(href)) return href;
+
+              var onclickValue = $el.attr("onclick") || "";
+              return extractUrlFromOnclick(onclickValue);
+            }
+
+            function getNumeric(v) {
+              var n = Number(v);
+              return Number.isFinite(n) ? n : 0;
+            }
+
+            function getSearchParam(name) {
+              try {
+                var sp = new URLSearchParams(window.location.search || "");
+                return sp.get(name) || "";
+              } catch (e) {
+                return "";
+              }
+            }
+
+            /* -----------------------------
+             * Iframe helpers
+             * ----------------------------- */
+            function getLpIframe() {
+              var $i = $("#content_id");
+              if (!$i.length) {
+                $i = $("#content_id_blank");
+              }
+              return $i;
+            }
+
+            function syncCurrentItemFromIframe() {
+              try {
+                var $i = getLpIframe();
+                if (!$i.length) {
+                  return;
+                }
+                var src = $i.attr("src") || "";
+                var m = src.match(/[?&]item_id=(\d+)/);
+                if (m && m[1]) {
+                  window.lpCurrentItemId = parseInt(m[1], 10) || window.lpCurrentItemId;
+                }
+              } catch (e) {}
+            }
+
+            /* -----------------------------------------------------------
+             * TOC-based navigation helpers
+             * ----------------------------------------------------------- */
+            function collectTocItemIds() {
+              var ids = [];
+              var seen = {};
+
+              $("#toc_id [id^='toc_']").each(function () {
+                var raw = (this.id || "").replace("toc_", "");
+                var n = parseInt(raw, 10);
+                if (!Number.isFinite(n) || n <= 0) return;
+                if (seen[n]) return;
+                seen[n] = true;
+                ids.push(n);
+              });
+
+              if (!ids.length) {
+                $("#toc_id a[href*='item_id=']").each(function () {
+                  try {
+                    var href = $(this).attr("href") || "";
+                    var m = href.match(/[?&]item_id=(\d+)/);
+                    if (!m) return;
+                    var n = parseInt(m[1], 10);
+                    if (!Number.isFinite(n) || n <= 0) return;
+                    if (seen[n]) return;
+                    seen[n] = true;
+                    ids.push(n);
+                  } catch (e) {}
+                });
+              }
+
+              return ids;
+            }
+
+            function getCurrentItemIdSafe() {
+              // Prefer runtime value (most reliable when available)
+              try {
+                if (window.olms && typeof olms.lms_item_id !== "undefined") {
+                  var n = parseInt(olms.lms_item_id, 10);
+                  if (Number.isFinite(n) && n > 0) return n;
+                }
+              } catch (e) {}
+
+              var fromWindow = getNumeric(window.lpCurrentItemId);
+              if (fromWindow > 0) return fromWindow;
+
+              var fromUrl = parseInt(getSearchParam("item_id"), 10);
+              return Number.isFinite(fromUrl) ? fromUrl : 0;
+            }
+
+            function resolveDirectionToId(direction, currentId) {
+              var ids = collectTocItemIds();
+              if (!ids.length) {
+                return 0;
+              }
+
+              var idx = ids.indexOf(currentId);
+              if (idx === -1) {
+                return direction === "next" ? (ids[0] || 0) : 0;
+              }
+
+              if (direction === "next") {
+                return ids[idx + 1] || 0;
+              }
+              if (direction === "previous") {
+                return ids[idx - 1] || 0;
+              }
+              return 0;
+            }
+
+            function buildContentUrlForItem(itemId) {
+              var cid = getSearchParam("cid") || "";
+              var sid = getSearchParam("sid") || "0";
+              var lpId = String(getNumeric(window.lpId) || {{ lp_id_num }});
+              return "lp_controller.php?action=content"
+                + "&cid=" + encodeURIComponent(cid)
+                + "&sid=" + encodeURIComponent(sid)
+                + "&origin=learnpath"
+                + "&lp_id=" + encodeURIComponent(lpId)
+                + "&lp_item_id=" + encodeURIComponent(String(itemId))
+                + "&item_id=" + encodeURIComponent(String(itemId));
+            }
+
+            // Iframe loading overlay (UX-friendly: delayed + minimum visible time)
+            var $loader = $("#lp-iframe-loader");
+            var $iframe = getLpIframe();
+
+            var loaderShowDelayMs = 250;      // Do not show loader for very fast loads
+            var loaderMinVisibleMs = 250;     // Avoid flicker if it appears
+            var loaderShowTimer = null;
+            var loaderHideTimer = null;
+            var loaderVisibleSince = 0;
+            var loaderMaxHideTimer = null;
+
+            function showLoaderNow(reason) {
+              if (!$loader.length) return;
+              if ($loader.hasClass("is-visible")) return;
+
+              loaderVisibleSince = Date.now();
+              $loader.addClass("is-visible").attr("aria-hidden", "false");
+
+              clearTimeout(loaderMaxHideTimer);
+              loaderMaxHideTimer = setTimeout(function () {
+                hideLoader("timeout");
+              }, 15000);
+            }
+
+            function scheduleShowLoader(reason) {
+              if (!$loader.length) return;
+
+              clearTimeout(loaderShowTimer);
+              loaderShowTimer = setTimeout(function () {
+                showLoaderNow(reason || "delayed");
+              }, loaderShowDelayMs);
+            }
+
+            function hideLoader(reason) {
+              if (!$loader.length) return;
+
+              clearTimeout(loaderShowTimer);
+              clearTimeout(loaderHideTimer);
+
+              if (!$loader.hasClass("is-visible")) {
+                clearTimeout(loaderMaxHideTimer);
+                return;
+              }
+
+              var elapsed = Date.now() - (loaderVisibleSince || 0);
+              if (elapsed < loaderMinVisibleMs) {
+                loaderHideTimer = setTimeout(function () {
+                  hideLoader(reason || "min-visible");
+                }, loaderMinVisibleMs - elapsed);
+                return;
+              }
+
+              $loader.removeClass("is-visible").attr("aria-hidden", "true");
+              clearTimeout(loaderMaxHideTimer);
+            }
+
+// Initial iframe load: delay the loader (no blink)
+            if ($iframe.length) {
+              scheduleShowLoader("initial");
+              $iframe.off("load.lpLoader").on("load.lpLoader", function () {
+                syncCurrentItemFromIframe();
+                hideLoader("iframe load");
+              });
+            } else {
+              console.warn("LP: iframe not found (#content_id / #content_id_blank).");
+            }
+
+            $(document).off("click.lpLoaderNav").on(
+              "click.lpLoaderNav",
+              "#toc_id a, #btn-menu-float a, #btn-menu-float button",
+              function () {
+                var $t = $(this);
+
+                // Do NOT show loader for the menu toggle (open/close).
+                if ($toggle.length && ($t.is($toggle) || $t.closest($toggle).length)) {
+                  return;
+                }
+
+                // Only show loader when this looks like real navigation.
+                var href = ($t.attr("href") || "");
+                var onclickValue = ($t.attr("onclick") || "");
+
+                var isKnownNavButton = $t.is("#scorm-next, #scorm-previous, #home-course");
+                var isTocClick = $t.closest("#toc_id").length > 0;
+
+                var isLpContentLink =
+                  href.indexOf("lp_controller.php") !== -1 ||
+                  href.indexOf("lp_view.php") !== -1 ||
+                  href.indexOf("lp_content.php") !== -1 ||
+                  onclickValue.indexOf("lp_controller.php") !== -1 ||
+                  onclickValue.indexOf("lp_view.php") !== -1 ||
+                  onclickValue.indexOf("lp_content.php") !== -1 ||
+                  onclickValue.indexOf("content_name") !== -1;
+
+                if (!isKnownNavButton && !isTocClick && !isLpContentLink) {
+                  return;
+                }
+
+                // Delay loader so fast loads don't show anything.
+                scheduleShowLoader("nav click");
+              }
+            );
+
+            function lpNavigateToItem(target, label) {
+              var isDirection = (target === "next" || target === "previous" || target === "first" || target === "last");
+              var targetItemId = 0;
+
+              showLoader("navigate " + label);
+              var currentItemId = getCurrentItemIdSafe();
+
+              // If target is numeric, validate it.
+              if (!isDirection) {
+                targetItemId = parseInt(target, 10);
+                if (!Number.isFinite(targetItemId) || targetItemId <= 0) {
+                  console.warn("LP NAV: invalid target item id for " + label + ":", target);
+                  hideLoader("nav failed");
+                  return false;
+                }
+              }
+
+              // If direction, first resolve it from TOC order (best for Chamilo LP).
+              if (isDirection && (target === "next" || target === "previous")) {
+                var tocResolved = resolveDirectionToId(target, currentItemId);
+                if (tocResolved > 0 && tocResolved !== currentItemId) {
+                  targetItemId = tocResolved;
+                }
+              }
+
+              // Prefer switch_item if runtime is ready (keeps SCORM/LP state).
+              if (window.olms && typeof switch_item === "function" && Number(olms.lms_initialized) === 1) {
+                console.info("LP NAV: switching item via runtime", {
+                  currentItemId: currentItemId,
+                  target: isDirection ? (targetItemId > 0 ? targetItemId : target) : targetItemId
+                });
+
+                try {
+                  // If we resolved a numeric target, pass numeric. Otherwise pass direction.
+                  switch_item(currentItemId || 0, isDirection ? (targetItemId > 0 ? targetItemId : target) : targetItemId);
+                  if (!isDirection || targetItemId > 0) {
+                    window.lpCurrentItemId = targetItemId;
+                  }
+                  return true;
+                } catch (e) {
+                  console.warn("LP NAV: switch_item() failed, falling back to iframe src update.", e);
+                }
+              }
+
+              // Fallback: resolve direction from runtime vars only if TOC resolution failed.
+              if (isDirection && targetItemId <= 0 && window.olms) {
+                try {
+                  if (target === "next") targetItemId = parseInt(olms.lms_next_item, 10) || 0;
+                  if (target === "previous") targetItemId = parseInt(olms.lms_previous_item, 10) || 0;
+                } catch (e) {}
+              }
+
+              // Final fallback: update iframe src directly.
+              if (targetItemId > 0) {
+                var $i = getLpIframe();
+                if ($i.length) {
+                  var src = buildContentUrlForItem(targetItemId);
+                  console.info("LP NAV: updating iframe src (fallback).", src);
+                  $i.attr("src", src);
+                  window.lpCurrentItemId = targetItemId;
+                  return true;
+                }
+              }
+
+              hideLoader("nav failed");
+              return false;
+            }
+
+            /* -----------------------------------------------------------
+             * Deterministic bindings for Next/Previous (Chamilo LP safe)
+             * ----------------------------------------------------------- */
+            function bindPrimaryNavButtons() {
+              var $prev = $("#scorm-previous");
+              var $next = $("#scorm-next");
+
+              function bind($el, direction, label) {
+                if (!$el || !$el.length) return;
+
+                // Tag for easier debugging
+                $el.attr("data-lp-nav", direction);
+
+                // Remove legacy inline handlers to prevent NaN or dead navigation.
+                // We still keep behavior via lpNavigateToItem().
+                $el.removeAttr("onclick").removeAttr("target");
+
+                if ($el.is("a")) {
+                  $el.attr("href", "#");
+                }
+
+                $el.off("click.lpNavPrimary").on("click.lpNavPrimary", function (e) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.info("LP NAV: " + label + " clicked -> navigating", direction);
+                  lpNavigateToItem(direction, label);
+                  return false;
+                });
+              }
+
+              if (!$prev.length || !$next.length) {
+                console.warn("LP NAV: primary #scorm-previous/#scorm-next elements not found. Will rely on heuristic patching.");
+              }
+
+              bind($prev, "previous", "previous");
+              bind($next, "next", "next");
+            }
+
+            function looksLikePrev(el) {
+              var $el = $(el);
+              var t = ($el.attr("title") || "").toLowerCase();
+              var a = ($el.attr("aria-label") || "").toLowerCase();
+              var h = ($el.html() || "").toLowerCase();
+              var s = [t, a, h].join(" ");
+
+              return (
+                s.indexOf("previous") !== -1 ||
+                s.indexOf("prev") !== -1 ||
+                s.indexOf("anterior") !== -1 ||
+                s.indexOf("mdi-chevron-left") !== -1 ||
+                s.indexOf("mdi-arrow-left") !== -1
+              );
+            }
+
+            function looksLikeNext(el) {
+              var $el = $(el);
+              var t = ($el.attr("title") || "").toLowerCase();
+              var a = ($el.attr("aria-label") || "").toLowerCase();
+              var h = ($el.html() || "").toLowerCase();
+              var s = [t, a, h].join(" ");
+
+              return (
+                s.indexOf("next") !== -1 ||
+                s.indexOf("siguiente") !== -1 ||
+                s.indexOf("mdi-chevron-right") !== -1 ||
+                s.indexOf("mdi-arrow-right") !== -1
+              );
+            }
+
+            function patchNavArrowsWhenTocHidden() {
+              if (tocHiddenSetting !== 1) return;
+
+              // Prefer known IDs if present (most reliable)
+              var $prevEl = $("#scorm-previous");
+              var $nextEl = $("#scorm-next");
+
+              // If not found, fallback to heuristics inside the floating menu
+              if (!$prevEl.length || !$nextEl.length) {
+                var $candidates = $menu
+                  .find("a, button")
+                  .not("#home-course")
+                  .not("#lp-view-expand-toggle")
+                  .not("[data-lp-menu='toggle']");
+
+                $prevEl = $prevEl.length ? $prevEl : $();
+                $nextEl = $nextEl.length ? $nextEl : $();
+
+                $candidates.each(function () {
+                  if (!$prevEl.length && looksLikePrev(this)) $prevEl = $(this);
+                  if (!$nextEl.length && looksLikeNext(this)) $nextEl = $(this);
+                });
+              }
+
+              function applyPatchDirection($el, direction, label) {
+                if (!$el || !$el.length) {
+                  console.warn("LP NAV: cannot patch " + label + " (element not found).");
+                  return;
+                }
+
+                $el.removeAttr("onclick").removeAttr("target");
+                if ($el.is("a")) {
+                  $el.attr("href", "#");
+                }
+
+                $el.off("click.lpNav").on("click.lpNav", function (e) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.info("LP NAV: " + label + " clicked -> navigating direction", direction);
+                  lpNavigateToItem(direction, label);
+                  return false;
+                });
+              }
+
+              applyPatchDirection($prevEl, "previous", "previous");
+              applyPatchDirection($nextEl, "next", "next");
+            }
+
+            // When TOC is hidden, keep LP content navigation inside the iframe named "content_name".
+            if (tocHiddenSetting === 1) {
+              $menu.find("a").each(function () {
+                var url = resolveUrl(this);
+                if (!url) return;
+
+                // If it's LP content navigation, ensure it targets the content iframe.
+                var isLpContent =
+                  url.indexOf("lp_controller.php") !== -1 &&
+                  url.indexOf("action=content") !== -1;
+
+                if (!isLpContent) return;
+
+                var $a = $(this);
+                var target = ($a.attr("target") || "").toLowerCase();
+
+                if (!target || target === "_self" || target === "_top") {
+                  $a.attr("target", "content_name");
+                }
+              });
+            }
+
+            // Keep original hook (guarded)
+            try {
+              if (typeof checkCurrentItemPosition === "function") {
+                checkCurrentItemPosition({{ lp_current_item_id_num }});
+              } else {
+                console.warn("LP: checkCurrentItemPosition() is not available.");
+              }
+            } catch (err) {
+              console.warn("LP: checkCurrentItemPosition() failed:", err);
+            }
+
+              {% if disable_js_in_lp_view == 0 %}
+            try {
+              var allowedTypes = ["link", "sco"];
+              if (window.olms && typeof olms.lms_item_type !== "undefined") {
+                if ($.inArray(olms.lms_item_type, allowedTypes) === -1) {
+                    {{ frame_ready }}
+                }
+              } else {
+                console.warn("LP: olms is not ready; skipping frame_ready hook.");
+              }
+            } catch (err) {
+              console.warn("LP: frame_ready hook failed:", err);
+            }
+              {% endif %}
+
+            function patchNavArrowsWhenTocHiddenSafe() {
+              if (tocHiddenSetting !== 1) return;
+
+              try {
+                patchNavArrowsWhenTocHidden();
+              } catch (e) {
+                console.warn("LP NAV: patchNavArrowsWhenTocHidden() failed:", e);
+              }
+            }
+
+            // Bind primary next/prev always (safe for Chamilo LP + SCORM)
+            bindPrimaryNavButtons();
+            setTimeout(bindPrimaryNavButtons, 200);
+            setTimeout(bindPrimaryNavButtons, 600);
+            if (tocHiddenSetting === 1) {
+              // Run immediately + retries (menu markup sometimes arrives late)
+              patchNavArrowsWhenTocHiddenSafe();
+              setTimeout(patchNavArrowsWhenTocHiddenSafe, 200);
+              setTimeout(patchNavArrowsWhenTocHiddenSafe, 600);
+            }
+
+          });
+        </script>
+    {% endautoescape %}
+{% endblock %}

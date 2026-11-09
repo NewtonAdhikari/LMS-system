@@ -1,0 +1,46 @@
+.p-inputtext {
+  @apply text-body-2 text-gray-90 bg-white px-3 py-2.5 border border-solid border-gray-50 transition-colors appearance-none rounded-lg outline-transparent w-full;
+
+  &:enabled {
+    @apply hover:border-primary
+      focus:border-primary focus:outline-0 focus:outline-none;
+  }
+
+  &.p-invalid {
+    @apply border-danger;
+
+    &::placeholder {
+        @apply text-danger;
+    }
+  }
+
+  &.p-variant-filled {
+    @apply bg-support-1;
+
+    &:enabled { }
+
+    &.p-filled {
+      @apply text-primary;
+    }
+  }
+
+  &:disabled {
+    @apply border-gray-50 text-gray-50;
+  }
+
+  &::placeholder {
+    @apply text-gray-50;
+  }
+
+  &-sm {
+    @apply px-3 py-1.5;
+  }
+
+  &-lg {
+    @apply py-3;
+  }
+
+  &-fluid {
+    @apply w-full
+  }
+}
