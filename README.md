@@ -198,10 +198,6 @@ The platform provides dedicated functionality for:
 - **Instructors:** Create courses, upload learning materials, manage assignments, conduct assessments, and evaluate students.
 - **Students:** Access courses, study learning materials, submit assignments, participate in discussions, and monitor academic progress.
 
-A demonstration environment is also available through the official Chamilo platform:
-
-https://campus.chamilo.net/
-
 ## API Integration
 
 The platform supports API integration for communication with external applications and services.
